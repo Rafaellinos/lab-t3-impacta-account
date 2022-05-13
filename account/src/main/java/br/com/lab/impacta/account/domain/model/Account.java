@@ -1,5 +1,6 @@
 package br.com.lab.impacta.account.domain.model;
 
+import br.com.lab.impacta.account.domain.exception.AccountWithoutBalanceException;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -15,19 +16,18 @@ public class Account {
 
     private Long number;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id")
     private Person customer;
 
     private Double balance;
 
     // regra de negocio fica no centro
-    public boolean debit(Double valueOfDebit) {
+    public void debit(Double valueOfDebit) {
         if (this.getBalance() < valueOfDebit) {
-            return false;
+            throw new AccountWithoutBalanceException();
         }
         Double debitedAmount = this.getBalance() - valueOfDebit;
         this.setBalance(debitedAmount);
-        return true;
     }
 }
